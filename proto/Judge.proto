@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+message JudgeReq {
+  optional int32 sub_id = 1;
+  optional int32 problem_id = 2;
+  optional string compile_command = 3;
+}
+
+message JudgeRsp {
+  optional string judge_info = 1;
+}
