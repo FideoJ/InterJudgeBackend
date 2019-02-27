@@ -8,17 +8,17 @@
 //
 #include "mdwrkapi.hpp"
 
-int main(int argc, char *argv []) {
-    int verbose = (argc > 1 && strcmp(argv [1], "-v") == 0);
-    mdwrk session("tcp://localhost:5555", "echo", verbose);
+int main(int argc, char *argv[]) {
+  int verbose = (argc > 1 && strcmp(argv[1], "-v") == 0);
+  mdwrk session("tcp://localhost:5555", "echo", verbose);
 
-    zmsg *reply = 0;
-    while(1) {
-        zmsg *request = session.recv(reply);
-        if(request == 0) {
-            break;              //  Worker was interrupted
-        }
-        reply = request;        //  Echo is complex... :-)
+  zmsg *reply = 0;
+  while (1) {
+    zmsg *request = session.recv(reply);
+    if (request == 0) {
+      break;  //  Worker was interrupted
     }
-    return 0;
+    reply = request;  //  Echo is complex... :-)
+  }
+  return 0;
 }
