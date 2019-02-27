@@ -4,7 +4,7 @@
 //
 #ifndef __MDP_H_INCLUDED__
 #define __MDP_H_INCLUDED__
-
+#include <cstddef>
 //  This is the version of MDP/Client we implement
 #define MDPC_CLIENT "MDPC01"
 
