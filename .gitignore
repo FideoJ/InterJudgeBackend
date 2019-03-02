@@ -1,5 +1,2 @@
-broker
-cli
-cli2
-worker
-a.out
+build/
+tmp_files/

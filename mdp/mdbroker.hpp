@@ -14,17 +14,17 @@
 
 //  We'd normally pull these from config data
 
-#define HEARTBEAT_LIVENESS 3     //  3-5 is reasonable
-#define HEARTBEAT_INTERVAL 2500  //  msecs
+#define HEARTBEAT_LIVENESS 3    //  3-5 is reasonable
+#define HEARTBEAT_INTERVAL 2500 //  msecs
 #define HEARTBEAT_EXPIRY HEARTBEAT_INTERVAL *HEARTBEAT_LIVENESS
 
 struct service;
 
 //  This defines one worker, idle or active
 struct worker {
-  std::string m_identity;  //  Address of worker
-  service *m_service;      //  Owning service, if known
-  int64_t m_expiry;        //  Expires at unless heartbeat
+  std::string m_identity; //  Address of worker
+  service *m_service;     //  Owning service, if known
+  int64_t m_expiry;       //  Expires at unless heartbeat
 
   worker(std::string identity, service *service = 0, int64_t expiry = 0) {
     m_identity = identity;
@@ -41,17 +41,17 @@ struct service {
     }
   }
 
-  std::string m_name;             //  Service name
-  std::deque<zmsg *> m_requests;  //  List of client requests
-  std::list<worker *> m_waiting;  //  List of waiting workers
-  size_t m_workers;               //  How many workers we have
+  std::string m_name;            //  Service name
+  std::deque<zmsg *> m_requests; //  List of client requests
+  std::list<worker *> m_waiting; //  List of waiting workers
+  size_t m_workers;              //  How many workers we have
 
   service(std::string name) { m_name = name; }
 };
 
 //  This defines a single broker
 class broker {
- public:
+public:
   //  ---------------------------------------------------------------------
   //  Constructor for broker object
 
@@ -86,7 +86,7 @@ class broker {
     s_console("I: MDP broker/0.1.1 is active at %s", endpoint.c_str());
   }
 
- private:
+private:
   //  ---------------------------------------------------------------------
   //  Delete any idle workers that haven't pinged us in a while.
 
@@ -130,7 +130,7 @@ class broker {
 
   void service_dispatch(service *srv, zmsg *msg) {
     assert(srv);
-    if (msg) {  //  Queue message if any
+    if (msg) { //  Queue message if any
       srv->m_requests.push_back(msg);
     }
 
@@ -228,17 +228,17 @@ class broker {
   //  Process message sent to us by a worker
 
   void worker_process(std::string sender, zmsg *msg) {
-    assert(msg && msg->parts() >= 1);  //  At least, command
+    assert(msg && msg->parts() >= 1); //  At least, command
 
     std::string command = (char *)msg->pop_front().c_str();
     bool worker_ready = m_workers.count(sender) > 0;
     worker *wrk = worker_require(sender);
 
     if (command.compare(MDPW_READY) == 0) {
-      if (worker_ready) {  //  Not first command in session
+      if (worker_ready) { //  Not first command in session
         worker_delete(wrk, 1);
       } else {
-        if (sender.size() >= 4  //  Reserved service name
+        if (sender.size() >= 4 //  Reserved service name
             && sender.find_first_of("mmi.") == 0) {
           worker_delete(wrk, 1);
         } else {
@@ -291,7 +291,7 @@ class broker {
     msg = (msg ? new zmsg(*msg) : new zmsg());
 
     //  Stack protocol envelope to start of message
-    if (option.size() > 0) {  //  Optional frame after command
+    if (option.size() > 0) { //  Optional frame after command
       msg->push_front((char *)option.c_str());
     }
     msg->push_front(command);
@@ -324,7 +324,7 @@ class broker {
   //  Process a request coming from a client
 
   void client_process(std::string sender, zmsg *msg) {
-    assert(msg && msg->parts() >= 2);  //  Service name + body
+    assert(msg && msg->parts() >= 2); //  Service name + body
 
     std::string service_name = (char *)msg->pop_front().c_str();
     service *srv = service_require(service_name);
@@ -337,7 +337,7 @@ class broker {
     }
   }
 
- public:
+public:
   //  Get and process messages forever or until interrupted
   void start_brokering() {
     int64_t now = s_clock();
@@ -358,7 +358,7 @@ class broker {
           msg->dump();
         }
         std::string sender = std::string((char *)msg->pop_front().c_str());
-        msg->pop_front();  // empty message
+        msg->pop_front(); // empty message
         std::string header = std::string((char *)msg->pop_front().c_str());
 
         //              std::cout << "sbrok, sender: "<< sender << std::endl;
@@ -390,32 +390,12 @@ class broker {
     }
   }
 
- private:
-  zmq::context_t *m_context;  //  0MQ context
-  zmq::socket_t *m_socket;    //  Socket for clients & workers
-  int m_verbose;              //  Print activity to stdout
-  std::string m_endpoint;     //  Broker binds to this endpoint
-  std::map<std::string, service *> m_services;  //  Hash of known services
-  std::map<std::string, worker *> m_workers;    //  Hash of known workers
-  std::set<worker *> m_waiting;                 //  List of waiting workers
+private:
+  zmq::context_t *m_context;                   //  0MQ context
+  zmq::socket_t *m_socket;                     //  Socket for clients & workers
+  int m_verbose;                               //  Print activity to stdout
+  std::string m_endpoint;                      //  Broker binds to this endpoint
+  std::map<std::string, service *> m_services; //  Hash of known services
+  std::map<std::string, worker *> m_workers;   //  Hash of known workers
+  std::set<worker *> m_waiting;                //  List of waiting workers
 };
-
-//  ---------------------------------------------------------------------
-//  Main broker work happens here
-
-int main(int argc, char *argv[]) {
-  int verbose = (argc > 1 && strcmp(argv[1], "-v") == 0);
-
-  s_version_assert(4, 0);
-  s_catch_signals();
-  broker brk(verbose);
-  brk.bind("tcp://*:5555");
-
-  brk.start_brokering();
-
-  if (s_interrupted) {
-    printf("W: interrupt received, shutting down...\n");
-  }
-
-  return 0;
-}
