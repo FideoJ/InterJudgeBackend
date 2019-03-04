@@ -1,46 +1,61 @@
 #include "mdwrkapi.hpp"
 #include <iostream>
-#include <stdexcept>
-#include <stdio.h>
-#include <string>
-
-std::string exec(const char *cmd) {
-  char buffer[1024];
-  std::string result = "";
-  FILE *pipe = popen(cmd, "r");
-  if (!pipe)
-    throw std::runtime_error("popen() failed!");
-  try {
-    while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-      result += buffer;
-    }
-  } catch (...) {
-    pclose(pipe);
-    throw;
-  }
-  pclose(pipe);
-  return result;
+extern "C" {
+#include "sandbox.h"
 }
 
-int main(int argc, char *argv[]) {
-  int verbose = (argc > 1 && strcmp(argv[1], "-v") == 0);
-  mdwrk session("tcp://localhost:5555", "Tester", verbose);
-
-  zmsg *reply = 0;
-  char sys_comand[101];
-  while (1) {
-    zmsg *request = session.recv(reply);
-    if (request == 0) {
-      break; //  Worker was interrupted
+class Tester {
+public:
+  void Run() {
+    mdwrk session("tcp://localhost:5555", "Tester", 1);
+    zmsg *rsp = nullptr;
+    while (1) {
+      zmsg *req = session.recv(rsp);
+      if (!req) {
+        break; //  Worker was interrupted
+      }
+      Handle(req, rsp);
     }
-    snprintf(sys_comand, 100, "%s", request->body());
-    std::string ret = exec(sys_comand);
-    if (!ret.compare(sys_comand)) {
-      reply = new zmsg("Tests passed.");
-    } else {
-      reply = new zmsg("Tests Failed.");
-    }
-    delete request;
   }
+
+private:
+  void Handle(zmsg *&req, zmsg *&rsp) {
+    struct result ret = Test();
+    if (ret.result == SUCCESS && ret.error == SUCCESS) {
+      rsp = new zmsg("Tests passed.");
+    } else {
+      rsp = new zmsg("Tests failed.");
+    }
+    delete req;
+    req = nullptr;
+  }
+
+  struct result Test() {
+    struct config cfg;
+    cfg.max_cpu_time = 1000;
+    cfg.max_real_time = 2000;
+    cfg.max_memory = 128 * 1024 * 1024;
+    cfg.max_process_number = 200;
+    cfg.max_output_size = 10000;
+    cfg.max_stack = 32 * 1024 * 1024;
+    cfg.exe_path = "submission";
+    cfg.input_path = "1.in";
+    cfg.output_path = "1.out";
+    cfg.error_path = "1.out";
+    cfg.args[0] = NULL;
+    cfg.env[0] = NULL;
+    cfg.log_path = "judger.log";
+    cfg.seccomp_rule_name = "c_cpp";
+    cfg.uid = 0;
+    cfg.gid = 0;
+    struct result ret = {};
+    run(&cfg, &ret);
+    return ret;
+  }
+};
+
+int main() {
+  Tester tester;
+  tester.Run();
   return 0;
 }

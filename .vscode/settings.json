@@ -30,6 +30,18 @@
     "type_traits": "cpp",
     "tuple": "cpp",
     "typeinfo": "cpp",
-    "utility": "cpp"
+    "utility": "cpp",
+    "chrono": "cpp",
+    "cmath": "cpp",
+    "cstdarg": "cpp",
+    "cstddef": "cpp",
+    "cstring": "cpp",
+    "ctime": "cpp",
+    "iomanip": "cpp",
+    "iostream": "cpp",
+    "memory": "cpp",
+    "numeric": "cpp",
+    "ratio": "cpp",
+    "cinttypes": "cpp"
   }
 }

@@ -1,3 +1,7 @@
+## 依赖
+- libzmq
+- cppzmq
+- libseccomp-dev
 ## 总体设计
 ### 组件
 - Client
