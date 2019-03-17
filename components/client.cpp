@@ -4,7 +4,7 @@
 int main(int argc, char *argv[]) {
   // int verbose = (argc > 1 && strcmp(argv[1], "-v") == 0);
 
-  mdcli session("tcp://localhost:5555", 1);
+  mdcli session("tcp://broker:5555", 1);
   session.set_timeout(10000);
 
   int count;

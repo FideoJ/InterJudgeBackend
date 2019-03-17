@@ -1,7 +1,7 @@
 #include "mdwrkapi.hpp"
 
 int main(int argc, char *argv[]) {
-  mdwrk session("tcp://localhost:5555", "Compiler:g++", 1);
+  mdwrk session("tcp://broker:5555", "Compiler:g++", 1);
 
   zmsg *reply = 0;
   char sys_comand[101];

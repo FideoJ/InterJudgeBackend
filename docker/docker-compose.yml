@@ -1,0 +1,52 @@
+version: "3"
+services:
+  broker:
+    build:
+      context: .
+      dockerfile: zmq-base.Dockerfile
+    image: zmq-base
+    container_name: broker
+    working_dir: /workspace
+    command: /bin/sh -c "./broker -v > ./broker.log 2>&1"
+    volumes:
+      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+    networks:
+      - judge_system
+  tester:
+    build:
+      context: .
+      dockerfile: tester.Dockerfile
+    image: tester
+    container_name: tester
+    working_dir: /workspace
+    command: /bin/sh -c "./tester -v > ./tester.log 2>&1"
+    volumes:
+      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+    networks:
+      - judge_system
+  compiler_gpp:
+    build:
+      context: .
+      dockerfile: compiler_gpp.Dockerfile
+    image: compiler_gpp
+    container_name: compiler_gpp
+    working_dir: /workspace
+    command: /bin/sh -c "./compiler_g++ -v > ./compiler_g++.log 2>&1"
+    volumes:
+      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+    networks:
+      - judge_system
+  client:
+    build:
+      context: .
+      dockerfile: zmq-base.Dockerfile
+    image: zmq-base
+    container_name: client
+    working_dir: /workspace
+    command: /bin/sh -c "./client.sh > ./client.log 2>&1"
+    volumes:
+      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+    networks:
+      - judge_system
+networks:
+  judge_system:
