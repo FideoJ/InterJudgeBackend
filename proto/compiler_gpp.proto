@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+package compiler_gpp;
+
+message Request {
+  optional int32 sub_id = 1;
+  repeated string src_filename = 2;
+  repeated string header_filename = 3;
+  optional string custom_dir = 4;
+  optional string compile_command = 5;
+}
+
+message Response {
+  optional ResultType result = 1;
+  optional string detail = 2;
+  optional int32 time_used = 3;
+  optional int32 memory_used = 4;
+
+  enum ResultType {
+    SUCCESS = 0;
+    FAIL = 1;
+    SYSTEM_ERROR = 2;
+  }
+}

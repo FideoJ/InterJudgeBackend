@@ -31,7 +31,7 @@ services:
     image: compiler_gpp
     container_name: compiler_gpp
     working_dir: /workspace
-    command: /bin/sh -c "./compiler_g++ -v > ./compiler_g++.log 2>&1"
+    command: /bin/sh -c "./compiler_gpp -v > ./compiler_gpp.log 2>&1"
     volumes:
       - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
     networks:
