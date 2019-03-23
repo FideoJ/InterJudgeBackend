@@ -1,37 +1,37 @@
-#include <iostream>
 #include "mdwrkapi.hpp"
+#include <iostream>
 extern "C" {
 #include "sandbox.h"
 }
 
-class Tester {
- public:
-  void Run() {
-    mdwrk session("tcp://broker:5555", "Tester", 1);
+class tester {
+public:
+  void run() {
+    mdwrk session("tcp://broker:5555", "tester", 1);
     zmsg *rsp = nullptr;
     while (1) {
       zmsg *req = session.recv(rsp);
       if (!req) {
-        break;  //  Worker was interrupted
+        break; //  Worker was interrupted
       }
-      Handle(req, rsp);
+      handle(req, rsp);
     }
   }
 
- private:
-  void Handle(zmsg *&req, zmsg *&rsp) {
-    struct result ret = Test();
+private:
+  void handle(zmsg *&req, zmsg *&rsp) {
+    struct result ret = test();
     std::cout << ret.result << " " << ret.error << std::endl;
     if (ret.result == SUCCESS && ret.error == SUCCESS) {
-      rsp = new zmsg("Tests passed.");
+      rsp = new zmsg("tests passed.");
     } else {
-      rsp = new zmsg("Tests failed.");
+      rsp = new zmsg("tests failed.");
     }
     delete req;
     req = nullptr;
   }
 
-  struct result Test() {
+  struct result test() {
     struct config cfg;
     cfg.max_cpu_time = 1000;
     cfg.max_real_time = 5000;
@@ -50,13 +50,13 @@ class Tester {
     cfg.uid = 65534;
     cfg.gid = 65534;
     struct result ret = {};
-    run(&cfg, &ret);
+    ::run(&cfg, &ret);
     return ret;
   }
 };
 
 int main() {
-  Tester tester;
-  tester.Run();
+  tester tester;
+  tester.run();
   return 0;
 }

@@ -42,6 +42,12 @@
     "memory": "cpp",
     "numeric": "cpp",
     "ratio": "cpp",
-    "cinttypes": "cpp"
-  }
+    "cinttypes": "cpp",
+    "hash_map": "cpp",
+    "hash_set": "cpp",
+    "unordered_set": "cpp"
+  },
+  "cSpell.words": [
+    "mdwrk"
+  ]
 }
