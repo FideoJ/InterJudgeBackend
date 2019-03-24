@@ -5,16 +5,18 @@ target_link_libraries(protocol protobuf)
 
 include_directories(${PROJECT_SOURCE_DIR}/deps/mdp)
 include_directories(${PROJECT_SOURCE_DIR}/deps/sandbox)
+include_directories(${PROJECT_SOURCE_DIR}/deps/file_agent)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 link_libraries(zmq)
 add_executable(broker broker.cpp)
+
+link_libraries(protocol)
 add_executable(client client.cpp)
 add_executable(compiler_gpp compiler_gpp.cpp)
 add_executable(tester tester.cpp)
 add_executable(file_provider file_provider.cpp)
+add_executable(file_agent_test file_agent_test.cpp)
 
 find_library(SANDBOX_LIB sandbox HINTS ${PROJECT_SOURCE_DIR}/deps/sandbox)
 target_link_libraries(tester ${SANDBOX_LIB} pthread seccomp)
-
-target_link_libraries(file_provider protocol)

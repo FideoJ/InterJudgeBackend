@@ -20,6 +20,10 @@ public:
        body_set(body);
    }
 
+   zmsg(char const *body, size_t size) {
+       body_set(body, size);
+   }
+
    //  -------------------------------------------------------------------------
    //  Constructor, sets initial body and sends message to socket
    zmsg(char const *body, zmq::socket_t &socket) {
@@ -118,6 +122,13 @@ public:
       push_back((char*)body);
    }
 
+   void body_set(const char *body, size_t size) {
+      if (m_part_data.size() > 0) {
+         m_part_data.erase(m_part_data.end()-1);
+      }
+      push_back((char*)body, size);
+   }
+
    void
    body_fmt (const char *format, ...)
    {
@@ -139,6 +150,14 @@ public:
            return 0;
    }
 
+   size_t body_size ()
+   {
+       if (m_part_data.size())
+           return m_part_data [m_part_data.size() - 1].size();
+       else
+           return 0;
+   }
+
    // zmsg_push
    void push_front(char *part) {
       m_part_data.insert(m_part_data.begin(), (unsigned char*)part);
@@ -147,6 +166,10 @@ public:
    // zmsg_append
    void push_back(char *part) {
       m_part_data.push_back((unsigned char*)part);
+   }
+
+   void push_back(char *part, size_t size) {
+      m_part_data.emplace_back((unsigned char*)part, size);
    }
 
    //  --------------------------------------------------------------------------

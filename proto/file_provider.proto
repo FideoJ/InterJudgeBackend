@@ -6,7 +6,7 @@ message Request {
   optional CommandType command = 1;
   optional string path = 2;
   optional int64 chunk_start = 3;
-  optional int64 chunk_end = 4;
+  optional int64 chunk_size = 4;
 
   enum CommandType {
     LIST = 0;
@@ -17,6 +17,6 @@ message Request {
 message Response {
   repeated string filename = 1;
   optional int64 chunk_start = 2;
-  optional int64 chunk_end = 3;
+  optional int64 chunk_size = 3;
   optional bytes chunk_data = 4;
 }

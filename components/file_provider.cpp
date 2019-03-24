@@ -21,7 +21,7 @@ using std::unordered_map;
 
 class FileProvider {
  public:
-  FileProvider(string provider_name, string workspace)
+  FileProvider(const string &provider_name, const string &workspace)
       : provider_name_(provider_name), workspace_(workspace) {}
 
   void run() {
@@ -39,63 +39,47 @@ class FileProvider {
  private:
   void handle(zmsg *&z_req, zmsg *&z_rsp) {
     Request req;
-    req.ParseFromString(string(z_req->body()));
+    req.ParseFromArray(z_req->body(), z_req->body_size());
+    // req.ParseFromString(string(z_req->body()));
     Response rsp;
-    if (req.path_type() == Request_CommandType_LIST) {
+    if (req.command() == Request_CommandType_LIST) {
       handle_list(req, rsp);
     } else {
       handle_fetch(req, rsp);
     }
     delete z_req;
-    z_rsp = new zmsg(rsp.SerializeAsString().c_str());
+    string rsp_packet = rsp.SerializeAsString();
+    z_rsp = new zmsg(rsp_packet.c_str(), rsp_packet.size());
   }
 
   void handle_list(const Request &req, Response &rsp) {
     DIR *dp;
     struct dirent *ep;
-    dp = opendir(get_dirname(req).c_str());
+    dp = opendir((workspace_ + '/' + req.path()).c_str());
     if (!dp) {
       LOG_SYS_ERR;
       return;
     }
-    while (ep = readdir(dp)) rsp.add_filename(ep->d_name);
+    while (ep = readdir(dp))
+      if (strcmp(ep->d_name, ".") && strcmp(ep->d_name, ".."))
+        rsp.add_filename(ep->d_name);
     closedir(dp);
   }
 
   void handle_fetch(const Request &req, Response &rsp) {
     // assert
     rsp.set_chunk_start(req.chunk_start());
-    rsp.set_chunk_end(req.chunk_end());
-    size_t chunk_size = req.chunk_end() - req.chunk_start();
+    size_t chunk_size = req.chunk_size();
     char *buf = new char[chunk_size];
-    read_one_chunk(get_path(req), buf, req.chunk_start(), chunk_size);
+    read_one_chunk(workspace_ + '/' + req.path(), buf, req.chunk_start(),
+                   chunk_size);
     rsp.set_chunk_data(buf, chunk_size);
+    rsp.set_chunk_size(chunk_size);
     delete[] buf;
   }
 
-  string get_dirname(const Request &req) {
-    string dirname = workspace_;
-    dirname += '/';
-    if (req.has_custom_path()) {
-      dirname += req.custom_path();
-    } else {
-      dirname += req.path_type() == Request_PathType_PROBLEM ? "problems/"
-                                                             : "submissions/";
-      dirname += std::to_string(req.id());
-    }
-    return dirname;
-  }
-
-  string get_path(const Request &req) {
-    if (req.has_custom_path()) {
-      return workspace_ + '/' + req.custom_path();
-    } else {
-      return get_dirname(req) + '/' + req.filename();
-    }
-  }
-
   char *read_one_chunk(const string &path, char *buf, size_t chunk_start,
-                       size_t chunk_size) {
+                       size_t &chunk_size) {
     FILE *file;
     auto iter = files_.find(path);
     if (iter != files_.end()) {
@@ -118,6 +102,7 @@ class FileProvider {
       return nullptr;
     }
     if (nread < chunk_size) {
+      chunk_size = nread;
       fclose(file);
       files_.erase(iter);
     }
