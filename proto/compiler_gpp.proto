@@ -1,20 +1,17 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package compiler_gpp;
 
 message Request {
-  optional int32 sub_id = 1;
+  int32 sub_id = 1;
   repeated string src_filename = 2;
   repeated string header_filename = 3;
-  optional string custom_dir = 4;
-  optional string compile_command = 5;
+  string file_provider = 4;
 }
 
 message Response {
-  optional ResultType result = 1;
-  optional string detail = 2;
-  optional int32 time_used = 3;
-  optional int32 memory_used = 4;
+  ResultType result = 1;
+  string detail = 2;
 
   enum ResultType {
     SUCCESS = 0;

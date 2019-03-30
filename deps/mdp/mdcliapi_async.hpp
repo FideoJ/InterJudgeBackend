@@ -1,5 +1,5 @@
-#ifndef __MDCLIAPI_HPP_INCLUDED__
-#define __MDCLIAPI_HPP_INCLUDED__
+#ifndef __MDCLIAPIASYNC_HPP_INCLUDED__
+#define __MDCLIAPIASYNC_HPP_INCLUDED__
 
 #include "mdp.h"
 #include "zmsg.hpp"
@@ -74,6 +74,8 @@ public:
       request->dump();
     }
     request->send(*m_client);
+    delete request;
+    request_p = NULL;
     return 0;
   }
 

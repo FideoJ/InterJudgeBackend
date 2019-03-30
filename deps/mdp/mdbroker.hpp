@@ -4,6 +4,9 @@
 //
 //     Andreas Hoelzlwimmer <andreas.hoelzlwimmer@fh-hagenberg.at>
 //
+#ifndef __MDBROKER_HPP_INCLUDED__
+#define __MDBROKER_HPP_INCLUDED__
+
 #include "mdp.h"
 #include "zmsg.hpp"
 
@@ -399,3 +402,5 @@ private:
   std::map<std::string, worker *> m_workers;   //  Hash of known workers
   std::set<worker *> m_waiting;                //  List of waiting workers
 };
+
+#endif

@@ -9,7 +9,7 @@ services:
     working_dir: /workspace
     command: /bin/sh -c "./broker -v > ./broker.log 2>&1"
     volumes:
-      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+      - /home/linjian/Desktop/InterJudge/InterJudgeBackend/workspace:/workspace
     networks:
       - judge_system
   tester:
@@ -21,7 +21,7 @@ services:
     working_dir: /workspace
     command: /bin/sh -c "./tester -v > ./tester.log 2>&1"
     volumes:
-      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+      - /home/linjian/Desktop/InterJudge/InterJudgeBackend/workspace:/workspace
     networks:
       - judge_system
   compiler_gpp:
@@ -31,9 +31,10 @@ services:
     image: compiler_gpp
     container_name: compiler_gpp
     working_dir: /workspace
-    command: /bin/sh -c "./compiler_gpp -v > ./compiler_gpp.log 2>&1"
+    # command: /bin/sh -c "./compiler_gpp -v > ./compiler_gpp.log 2>&1"
+    command: echo $PATH
     volumes:
-      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+      - /home/linjian/Desktop/InterJudge/InterJudgeBackend/workspace:/workspace
     networks:
       - judge_system
   client:
@@ -45,7 +46,7 @@ services:
     working_dir: /workspace
     command: /bin/sh -c "./client.sh > ./client.log 2>&1"
     volumes:
-      - /home/linjian/Desktop/JudgeSystem/workspace:/workspace
+      - /home/linjian/Desktop/InterJudge/InterJudgeBackend/workspace:/workspace
     networks:
       - judge_system
 networks:

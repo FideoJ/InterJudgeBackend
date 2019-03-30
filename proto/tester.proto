@@ -1,21 +1,21 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package tester;
 
 message Request {
-  optional int32 sub_id = 1;
-  optional int32 prob_id = 2;
-  optional string executable_filename = 3;
-  repeated string case_name = 4;
-  optional string custom_dir = 5;
-  optional string test_command = 6;
+  int32 sub_id = 1;
+  int32 prob_id = 2;
+  string exec_file_provider = 3;
+  string test_file_provider = 4;
+  repeated int32 test_case_id = 5;
+  int32 max_cpu_time = 6;
+  int32 max_memory = 7;
 }
 
 message Response {
-  optional ResultType result = 1;
-  repeated CaseInfo case_info = 2;
-  optional int32 time_used = 3;
-  optional int32 memory_used = 4;
+  int32 sub_id = 1;
+  ResultType result = 2;
+  repeated TestCase test_case = 3;
 
   enum ResultType {
     ACCEPTED = 0;
@@ -23,12 +23,16 @@ message Response {
     PRESENTATION_ERROR = 2;
     TIME_LIMIT_EXCEEDED = 3;
     MEMORY_LIMIT_EXCEEDED = 4;
-    SYSTEM_ERROR = 5;
+    RUNTIME_ERROR = 5;
+    SYSTEM_ERROR = 6;
   }
 
-  message CaseInfo {
-    optional string case_name = 1;
-    optional ResultType result = 2;
-    optional string detail = 3;
+  message TestCase {
+    int32 test_case_id = 1;
+    ResultType result = 2;
+    int32 cpu_time = 3;
+    int32 memory = 4;
+    int32 exit_code = 5;
+    int32 signal = 6;
   }
 }

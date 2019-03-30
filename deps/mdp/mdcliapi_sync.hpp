@@ -1,5 +1,5 @@
-#ifndef __MDCLIAPI_HPP_INCLUDED__
-#define __MDCLIAPI_HPP_INCLUDED__
+#ifndef __MDCLIAPISYNC_HPP_INCLUDED__
+#define __MDCLIAPISYNC_HPP_INCLUDED__
 
 //#include "mdcliapi.h"
 
@@ -7,7 +7,7 @@
 #include "zmsg.hpp"
 
 class mdcli {
- public:
+public:
   //  ---------------------------------------------------------------------
   //  Constructor
 
@@ -18,8 +18,8 @@ class mdcli {
     m_broker = broker;
     m_context = new zmq::context_t(1);
     m_verbose = verbose;
-    m_timeout = 2500;  //  msecs
-    m_retries = 3;     //  Before we abandon
+    m_timeout = 2500; //  msecs
+    m_retries = 3;    //  Before we abandon
     m_client = 0;
 
     s_catch_signals();
@@ -107,7 +107,7 @@ class mdcli {
           assert(reply_service.compare((unsigned char *)service.c_str()) == 0);
 
           delete request;
-          return recv_msg;  //  Success
+          return recv_msg; //  Success
         } else {
           if (--retries_left) {
             if (m_verbose) {
@@ -121,7 +121,7 @@ class mdcli {
             if (m_verbose) {
               s_console("W: permanent error, abandoning request");
             }
-            break;  //  Give up
+            break; //  Give up
           }
         }
       }
@@ -133,13 +133,13 @@ class mdcli {
     return 0;
   }
 
- private:
+private:
   std::string m_broker;
   zmq::context_t *m_context;
-  zmq::socket_t *m_client;  //  Socket to broker
-  int m_verbose;            //  Print activity to stdout
-  int m_timeout;            //  Request timeout
-  int m_retries;            //  Request retries
+  zmq::socket_t *m_client; //  Socket to broker
+  int m_verbose;           //  Print activity to stdout
+  int m_timeout;           //  Request timeout
+  int m_retries;           //  Request retries
 };
 
 #endif

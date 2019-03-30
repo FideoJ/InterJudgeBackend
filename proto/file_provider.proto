@@ -1,12 +1,12 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package file_provider;
 
 message Request {
-  optional CommandType command = 1;
-  optional string path = 2;
-  optional int64 chunk_start = 3;
-  optional int64 chunk_size = 4;
+  CommandType command = 1;
+  string path = 2;
+  int64 chunk_start = 3;
+  int64 chunk_size = 4;
 
   enum CommandType {
     LIST = 0;
@@ -15,8 +15,16 @@ message Request {
 }
 
 message Response {
-  repeated string filename = 1;
-  optional int64 chunk_start = 2;
-  optional int64 chunk_size = 3;
-  optional bytes chunk_data = 4;
+  ResultType result = 1;
+  // LIST
+  repeated string filename = 2;
+  // FETCH
+  int64 chunk_start = 3;
+  // chunk_data.size() implies chunk_size
+  bytes chunk_data = 4;
+
+  enum ResultType {
+    SUCCESS = 0;
+    ERROR = 1;
+  }
 }

@@ -1,14 +1,18 @@
 find_package(Protobuf REQUIRED)
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROJECT_SOURCE_DIR}/proto/file_provider.proto)
+file(GLOB PROTO_FILES ${PROJECT_SOURCE_DIR}/proto/*.proto)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 add_library(protocol ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(protocol protobuf)
 
 include_directories(${PROJECT_SOURCE_DIR}/deps/mdp)
 include_directories(${PROJECT_SOURCE_DIR}/deps/sandbox)
 include_directories(${PROJECT_SOURCE_DIR}/deps/file_agent)
+include_directories(${PROJECT_SOURCE_DIR}/deps/thread_pool)
+include_directories(${PROJECT_SOURCE_DIR}/deps/uuid4)
+include_directories(${PROJECT_SOURCE_DIR}/deps/logger)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-link_libraries(zmq)
+link_libraries(zmq gflags glog)
 add_executable(broker broker.cpp)
 
 link_libraries(protocol)
@@ -19,4 +23,5 @@ add_executable(file_provider file_provider.cpp)
 add_executable(file_agent_test file_agent_test.cpp)
 
 find_library(SANDBOX_LIB sandbox HINTS ${PROJECT_SOURCE_DIR}/deps/sandbox)
+target_link_libraries(compiler_gpp ${SANDBOX_LIB} pthread seccomp)
 target_link_libraries(tester ${SANDBOX_LIB} pthread seccomp)
