@@ -3,10 +3,11 @@ syntax = "proto3";
 package file_provider;
 
 message Request {
-  CommandType command = 1;
-  string path = 2;
-  int64 chunk_start = 3;
-  int64 chunk_size = 4;
+  string request_id = 1;
+  CommandType command = 2;
+  string path = 3;
+  int64 chunk_start = 4;
+  int64 chunk_size = 5;
 
   enum CommandType {
     LIST = 0;
@@ -15,13 +16,14 @@ message Request {
 }
 
 message Response {
-  ResultType result = 1;
+  string request_id = 1;
+  ResultType result = 2;
   // LIST
-  repeated string filename = 2;
+  repeated string filename = 3;
   // FETCH
-  int64 chunk_start = 3;
+  int64 chunk_start = 4;
   // chunk_data.size() implies chunk_size
-  bytes chunk_data = 4;
+  bytes chunk_data = 5;
 
   enum ResultType {
     SUCCESS = 0;

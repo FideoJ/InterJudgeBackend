@@ -3,15 +3,21 @@ syntax = "proto3";
 package compiler_gpp;
 
 message Request {
-  int32 sub_id = 1;
-  repeated string src_filename = 2;
-  repeated string header_filename = 3;
+  string request_id = 1;
+  int32 sub_id = 2;
+  int32 prob_id = 3;
   string file_provider = 4;
+  repeated string sub_src_filename = 5;
+  repeated string sub_header_filename = 6;
+  repeated string prob_src_filename = 7;
+  repeated string prob_header_filename = 8;
 }
 
 message Response {
-  ResultType result = 1;
-  string detail = 2;
+  string request_id = 1;
+  ResultType result = 2;
+  string detail = 3;
+  string file_provider = 4;
 
   enum ResultType {
     SUCCESS = 0;
