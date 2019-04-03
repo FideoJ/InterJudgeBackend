@@ -1,4 +1,5 @@
 build/
+bin/
 workspace/
 record.md
 ipch/

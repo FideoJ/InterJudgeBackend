@@ -16,11 +16,9 @@ link_libraries(zmq gflags glog)
 add_executable(broker broker.cpp)
 
 link_libraries(protocol)
-add_executable(client client.cpp)
 add_executable(compiler_gpp compiler_gpp.cpp)
 add_executable(tester tester.cpp)
 add_executable(file_provider file_provider.cpp)
-add_executable(file_agent_test file_agent_test.cpp)
 
 find_library(SANDBOX_LIB sandbox HINTS ${PROJECT_SOURCE_DIR}/deps/sandbox)
 target_link_libraries(compiler_gpp ${SANDBOX_LIB} pthread seccomp)
