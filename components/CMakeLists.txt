@@ -12,10 +12,10 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/uuid4)
 include_directories(${PROJECT_SOURCE_DIR}/deps/logger)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-link_libraries(zmq gflags glog)
+link_libraries(zmq)
 add_executable(broker broker.cpp)
 
-link_libraries(protocol)
+link_libraries(gflags glog protocol)
 add_executable(compiler_gpp compiler_gpp.cpp)
 add_executable(tester tester.cpp)
 add_executable(file_provider file_provider.cpp)

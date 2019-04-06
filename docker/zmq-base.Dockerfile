@@ -1,2 +1,7 @@
-FROM ubuntu:18.04
-RUN apt-get clean && apt-get update && apt-get install -y libzmq3-dev libgflags-dev libgoogle-glog-dev
+FROM ubuntu:16.04
+WORKDIR /inter-judge
+RUN apt-get update \
+  && apt-get install -y libzmq3-dev \
+  && apt-get autoremove --purge -y \
+  && apt-get autoclean -y \
+  && rm -rf /var/cache/apt/* /tmp/*
