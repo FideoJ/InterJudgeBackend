@@ -10,6 +10,10 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      restart_policy:
+        delay: 3s
+        max_attempts: 3
+        window: 5s
 
   file_provider:
     image: file_provider
@@ -22,6 +26,10 @@ services:
     deploy:
       mode: replicated
       replicas: 20
+      restart_policy:
+        delay: 3s
+        max_attempts: 3
+        window: 5s
 
   compiler_gpp:
     image: compiler_gpp
@@ -33,7 +41,11 @@ services:
       - inter-judge-net
     deploy:
       mode: replicated
-      replicas: 10
+      replicas: 20
+      restart_policy:
+        delay: 3s
+        max_attempts: 3
+        window: 5s
 
   tester:
     image: tester
@@ -45,8 +57,15 @@ services:
       - inter-judge-net
     deploy:
       mode: replicated
-      replicas: 10
+      replicas: 20
+      restart_policy:
+        delay: 3s
+        max_attempts: 3
+        window: 5s
 
 networks:
   inter-judge-net:
     driver: overlay
+    ipam:
+      config:
+        - subnet: 172.197.0.0/16
