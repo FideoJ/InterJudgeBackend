@@ -1,14 +1,10 @@
 version: "3"
 services:
   broker:
-    build:
-      context: ..
-      dockerfile: broker.Dockerfile
     image: broker
-    container_name: broker
-    volumes:
-      - /etc/hostname:/etc/hostname
     command: /bin/sh -c "bin/broker"
+    ports:
+      - 5555:5555
     networks:
       - inter-judge-net
     deploy:
@@ -16,53 +12,41 @@ services:
       replicas: 1
 
   file_provider:
-    build:
-      context: ..
-      dockerfile: file_provider.Dockerfile
     image: file_provider
-    container_name: file_provider
     volumes:
       - /etc/hostname:/etc/hostname
-      - /var/run/inter-judge/workspace:/inter-judge/workspace
-    command: /bin/sh -c "bin/file_provider --provider_name=`hostname` -v=1 --logtostderr=1"
+      - /var/local/InterJudgeVolume:/inter-judge
+    command: /bin/sh -c "bin/file_provider --provider_name=`cat /etc/hostname | tr -d '\n'` --logtostderr=1"
     networks:
       - inter-judge-net
     deploy:
-      mode: global
+      mode: replicated
+      replicas: 20
 
   compiler_gpp:
-    build:
-      context: ..
-      dockerfile: compiler_gpp.Dockerfile
     image: compiler_gpp
-    container_name: compiler_gpp
     volumes:
       - /etc/hostname:/etc/hostname
-      - /var/run/inter-judge/workspace:/inter-judge/workspace
-    command: /bin/sh -c "bin/compiler_gpp --file_provider=`hostname` -v=1 --logtostderr=1"
+      - /var/local/InterJudgeVolume:/inter-judge
+    command: /bin/sh -c "bin/compiler_gpp --file_provider=`cat /etc/hostname | tr -d '\n'` --logtostderr=1"
     networks:
       - inter-judge-net
     deploy:
       mode: replicated
-      replicas: 6
+      replicas: 10
 
   tester:
-    build:
-      context: ..
-      dockerfile: tester.Dockerfile
     image: tester
-    container_name: tester
     volumes:
       - /etc/hostname:/etc/hostname
-      - /var/run/inter-judge/workspace:/inter-judge/workspace
-    command: /bin/sh -c "bin/tester --file_provider=`hostname` -v=1 --logtostderr=1"
+      - /var/local/InterJudgeVolume:/inter-judge
+    command: /bin/sh -c "bin/tester --file_provider=`cat /etc/hostname | tr -d '\n'` --logtostderr=1"
     networks:
       - inter-judge-net
     deploy:
       mode: replicated
-      replicas: 6
+      replicas: 10
 
 networks:
   inter-judge-net:
     driver: overlay
-
