@@ -18,7 +18,7 @@ class FileAgent {
 public:
   FileAgent(const string &workspace, const string &broker_addr,
             const string &provider_name, bool verbose = false,
-            int timeout = 3000, int pipe_size = 2)
+            int timeout = 10000, int pipe_size = 1)
       : session_(broker_addr, verbose), workspace_(workspace),
         provider_name_(provider_name), pipe_size_(pipe_size) {
     session_.set_timeout(timeout);

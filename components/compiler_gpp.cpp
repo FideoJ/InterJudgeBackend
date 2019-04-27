@@ -154,7 +154,7 @@ private:
     cfg.max_cpu_time = 10 * 1000;
     cfg.max_real_time = 15 * 1000;
     cfg.memory_limit_check_only = 0;
-    cfg.max_memory = 128 * 1024 * 1024;
+    cfg.max_memory = 512 * 1024 * 1024;
     cfg.max_process_number = 200;
     cfg.max_output_size = 20 * 1024 * 1024;
     cfg.max_stack = 32 * 1024 * 1024;
@@ -204,10 +204,9 @@ private:
     cfg.args[argc] = nullptr;
 
     ::run(&cfg, ret);
-    VLOG(1) << ret->cpu_time << " " << ret->real_time << " "
-      << ret->memory << " " << ret->signal << " "
-      << ret->exit_code << " " << ret->error << " "
-      << ret->result;
+    VLOG(1) << ret->cpu_time << " " << ret->real_time << " " << ret->memory
+            << " " << ret->signal << " " << ret->exit_code << " " << ret->error
+            << " " << ret->result;
   }
 
   void set_compiling_result(const struct result *ret,
