@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <signal.h>
+#include "uuid4.h"
 
 #if (!defined(WIN32))
 #   include <sys/time.h>
@@ -157,12 +158,17 @@ s_dump (zmq::socket_t & socket)
 inline std::string
 s_set_id (zmq::socket_t & socket)
 {
-    std::stringstream ss;
-    ss << std::hex << std::uppercase
-       << std::setw(4) << std::setfill('0') << within (0x10000) << "-"
-       << std::setw(4) << std::setfill('0') << within (0x10000);
-    socket.setsockopt(ZMQ_IDENTITY, ss.str().c_str(), ss.str().length());
-    return ss.str();
+    // std::stringstream ss;
+    // ss << std::hex << std::uppercase
+    //    << std::setw(4) << std::setfill('0') << within (0x10000) << "-"
+    //    << std::setw(4) << std::setfill('0') << within (0x10000);
+    int ret = uuid4_init();
+    assert(ret != UUID4_EFAILURE);
+    char uuid_buf[UUID4_LEN];
+    uuid4_generate(uuid_buf);
+    socket.setsockopt(ZMQ_IDENTITY, uuid_buf, UUID4_LEN - 1);
+    // printf("%s\n", uuid_buf);
+    return std::string(uuid_buf);
 }
 #else
 // Fix #521

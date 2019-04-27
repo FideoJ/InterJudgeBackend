@@ -12,7 +12,7 @@ public:
   //  ---------------------------------------------------------------------
   //  Constructor
 
-  mdcli(std::string broker, int verbose) {
+  mdcli(const std::string &broker, int verbose) {
     s_version_assert(4, 0);
 
     m_broker = broker;
@@ -58,7 +58,7 @@ public:
   //  Send request to broker
   //  Takes ownership of request message and destroys it when sent.
 
-  int send(std::string service, zmsg *&request_p) {
+  int send(const std::string &service, zmsg *&request_p) {
     assert(request_p);
     zmsg *request = request_p;
 

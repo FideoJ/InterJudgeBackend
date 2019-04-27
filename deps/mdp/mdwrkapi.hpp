@@ -14,7 +14,7 @@ public:
   //  ---------------------------------------------------------------------
   //  Constructor
 
-  mdwrk(std::string broker, std::string service, int verbose) {
+  mdwrk(const std::string &broker, const std::string &service, int verbose) {
     s_version_assert(4, 0);
 
     m_broker = broker;
@@ -41,7 +41,7 @@ public:
   //  ---------------------------------------------------------------------
   //  Send message to broker
   //  If no _msg is provided, creates one internally
-  void send_to_broker(char *command, std::string option, zmsg *_msg) {
+  void send_to_broker(char *command, const std::string &option, zmsg *_msg) {
     zmsg *msg = _msg ? new zmsg(*_msg) : new zmsg();
 
     //  Stack protocol envelope to start of message

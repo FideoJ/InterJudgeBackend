@@ -29,7 +29,7 @@ struct worker {
   service *m_service;     //  Owning service, if known
   int64_t m_expiry;       //  Expires at unless heartbeat
 
-  worker(std::string identity, service *service = 0, int64_t expiry = 0) {
+  worker(const std::string &identity, service *service = 0, int64_t expiry = 0) {
     m_identity = identity;
     m_service = service;
     m_expiry = expiry;
@@ -49,7 +49,7 @@ struct service {
   std::list<worker *> m_waiting; //  List of waiting workers
   size_t m_workers;              //  How many workers we have
 
-  service(std::string name) { m_name = name; }
+  service(const std::string &name) { m_name = name; }
 };
 
 //  This defines a single broker
@@ -62,6 +62,19 @@ public:
     //  Initialize broker state
     m_context = new zmq::context_t(1);
     m_socket = new zmq::socket_t(*m_context, ZMQ_ROUTER);
+    int sendhwm, recvhwm;
+    // size_t dummy = sizeof sendhwm;
+    // m_socket->getsockopt(ZMQ_SNDHWM, &sendhwm, &dummy);
+    // m_socket->getsockopt(ZMQ_RCVHWM, &recvhwm, &dummy);
+    // s_console("%d %d\n", sendhwm, recvhwm);
+    sendhwm = recvhwm = 100000;
+    m_socket->setsockopt(ZMQ_SNDHWM, &sendhwm, sizeof sendhwm);
+    m_socket->setsockopt(ZMQ_RCVHWM, &recvhwm, sizeof recvhwm);
+
+    // dummy = sizeof sendhwm;
+    // m_socket->getsockopt(ZMQ_SNDHWM, &sendhwm, &dummy);
+    // m_socket->getsockopt(ZMQ_RCVHWM, &recvhwm, &dummy);
+    // s_console("%d %d\n", sendhwm, recvhwm);
     m_verbose = verbose;
   }
 
@@ -83,7 +96,7 @@ public:
   //  Bind broker to endpoint, can call this multiple times
   //  We use a single socket for both clients and workers.
 
-  void bind(std::string endpoint) {
+  void bind(const std::string &endpoint) {
     m_endpoint = endpoint;
     m_socket->bind(m_endpoint.c_str());
     s_console("I: MDP broker/0.1.1 is active at %s", endpoint.c_str());
@@ -114,7 +127,7 @@ private:
   //  ---------------------------------------------------------------------
   //  Locate or create new service entry
 
-  service *service_require(std::string name) {
+  service *service_require(const std::string &name) {
     assert(name.size() > 0);
     if (m_services.count(name)) {
       return m_services.at(name);
@@ -161,7 +174,7 @@ private:
   //  ---------------------------------------------------------------------
   //  Handle internal service according to 8/MMI specification
 
-  void service_internal(std::string service_name, zmsg *msg) {
+  void service_internal(const std::string &service_name, zmsg *msg) {
     if (service_name.compare("mmi.service") == 0) {
       service *srv = m_services.at(msg->body());
       if (srv && srv->m_workers) {
@@ -185,7 +198,7 @@ private:
   //  ---------------------------------------------------------------------
   //  Creates worker if necessary
 
-  worker *worker_require(std::string identity) {
+  worker *worker_require(const std::string &identity) {
     assert(identity.length() != 0);
 
     //  self->workers is keyed off worker identity
@@ -230,7 +243,7 @@ private:
   //  ---------------------------------------------------------------------
   //  Process message sent to us by a worker
 
-  void worker_process(std::string sender, zmsg *msg) {
+  void worker_process(const std::string &sender, zmsg *msg) {
     assert(msg && msg->parts() >= 1); //  At least, command
 
     std::string command = (char *)msg->pop_front().c_str();
@@ -242,7 +255,7 @@ private:
         worker_delete(wrk, 1);
       } else {
         if (sender.size() >= 4 //  Reserved service name
-            && sender.find_first_of("mmi.") == 0) {
+            && sender.substr(0, 4) == "mmi.") {
           worker_delete(wrk, 1);
         } else {
           //  Attach worker to service and mark as idle
@@ -289,7 +302,7 @@ private:
   //  Send message to worker
   //  If pointer to message is provided, sends that message
 
-  void worker_send(worker *worker, char *command, std::string option,
+  void worker_send(worker *worker, char *command, const std::string &option,
                    zmsg *msg) {
     msg = (msg ? new zmsg(*msg) : new zmsg());
 
@@ -326,14 +339,14 @@ private:
   //  ---------------------------------------------------------------------
   //  Process a request coming from a client
 
-  void client_process(std::string sender, zmsg *msg) {
+  void client_process(const std::string &sender, zmsg *msg) {
     assert(msg && msg->parts() >= 2); //  Service name + body
 
     std::string service_name = (char *)msg->pop_front().c_str();
     service *srv = service_require(service_name);
     //  Set reply return address to client sender
     msg->wrap(sender.c_str(), "");
-    if (service_name.length() >= 4 && service_name.find_first_of("mmi.") == 0) {
+    if (service_name.length() >= 4 && service_name.substr(0, 4) == "mmi.") {
       service_internal(service_name, msg);
     } else {
       service_dispatch(srv, msg);

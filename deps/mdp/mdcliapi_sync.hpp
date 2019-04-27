@@ -11,7 +11,7 @@ public:
   //  ---------------------------------------------------------------------
   //  Constructor
 
-  mdcli(std::string broker, int verbose) {
+  mdcli(const std::string &broker, int verbose) {
     assert(broker.size() != 0);
     s_version_assert(4, 0);
 
@@ -65,7 +65,7 @@ public:
   //  Takes ownership of request message and destroys it when sent.
   //  Returns the reply message or NULL if there was no reply.
 
-  zmsg *send(std::string service, zmsg *&request_p) {
+  zmsg *send(const std::string &service, zmsg *&request_p) {
     assert(request_p);
     zmsg *request = request_p;
 
