@@ -89,6 +89,19 @@ private:
       rsp.set_result(tester::Response::SYSTEM_ERROR);
       return;
     }
+    // fetch one at a time to avoid requesting too quickly
+    for (int idx = 0; idx < req.test_case_id_size(); ++idx) {
+      string in_filename = std::to_string(req.test_case_id(idx)) + ".in";
+      string expected_out_filename =
+          std::to_string(req.test_case_id(idx)) + ".out";
+      if (!(ensure_file(_PathType::PROBLEM, in_filename, req,
+                        req.test_file_provider(), &agent) &&
+            ensure_file(_PathType::PROBLEM, expected_out_filename, req,
+                        req.test_file_provider(), &agent))) {
+        rsp.set_result(tester::Response::SYSTEM_ERROR);
+        return;
+      }
+    }
     // run each test case in thread pool
     int test_case_id_size = req.test_case_id_size();
     std::vector<std::future<void>> future_vec;
@@ -167,13 +180,17 @@ private:
                    FileAgent *agent) {
     int id = path_type == _PathType::SUBMISSION ? req.sub_id() : req.prob_id();
     string path = path_of("", path_type, id, filename);
-    if (file_provider != file_provider_)
-      return agent && agent->fetch(path);
+    // if (file_provider != file_provider_)
+    //   return agent && agent->fetch(path);
 
     string full_path = workspace_ + '/' + path;
     if (access(full_path.c_str(), R_OK) < 0) {
-      if (errno == ENOTDIR || errno == ENOENT) {
-        return agent && agent->fetch(path);
+      if ((errno == ENOTDIR || errno == ENOENT) && agent) {
+        if (!agent->fetch(path)) {
+          // check if someone has fetched
+          sleep(1);
+          return access(full_path.c_str(), R_OK) == 0;
+        }
       } else {
         LOG_SYS_ERR;
         return false;
@@ -183,18 +200,18 @@ private:
   }
 
   void do_testing(struct result *ret, const tester::Request &req, int idx) {
-    string in_filename = std::to_string(req.test_case_id(idx)) + ".in";
-    string expected_out_filename =
-        std::to_string(req.test_case_id(idx)) + ".out";
-    FileAgent agent(workspace_, broker_addr_, req.test_file_provider(),
-                    verbose_);
-    if (!(ensure_file(_PathType::PROBLEM, in_filename, req,
-                      req.test_file_provider(), &agent) &&
-          ensure_file(_PathType::PROBLEM, expected_out_filename, req,
-                      req.test_file_provider(), &agent))) {
-      ret->result = ::SYSTEM_ERROR;
-      return;
-    }
+    // string in_filename = std::to_string(req.test_case_id(idx)) + ".in";
+    // string expected_out_filename =
+    //     std::to_string(req.test_case_id(idx)) + ".out";
+    // FileAgent agent(workspace_, broker_addr_, req.test_file_provider(),
+    //                 verbose_);
+    // if (!(ensure_file(_PathType::PROBLEM, in_filename, req,
+    //                   req.test_file_provider(), &agent) &&
+    //       ensure_file(_PathType::PROBLEM, expected_out_filename, req,
+    //                   req.test_file_provider(), &agent))) {
+    //   ret->result = ::SYSTEM_ERROR;
+    //   return;
+    // }
     run_test_case(ret, req, idx);
   }
 
